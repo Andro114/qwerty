@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Lineup Selection</title>
+    <style>
+    /* Layout Styling */
+    body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Full viewport height */
+            margin: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            flex: 1; /* Take up remaining space between header and footer */
+            overflow: hidden; /* Prevent scrollbars from appearing on the wrapper */
+        }
+
+    nav {
+    width: 20%; /* Navigation occupies 20% of the width */
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    padding: 0;
+    overflow: hidden; /* Prevent scrollbar on the left */
+}
+
+nav .label {
+    font-size: 40px; /* Font size for labels */
+    font-weight: bold;
+    color: rgb(0, 108, 197); /* White color for label text */
+    background-color: #ffffff; /* Blue background color for the label */
+    padding: 40px; /* Add padding to make the label look like a box */
+    text-align: center; /* Center-align the label text */
+    width: 100%; /* Make the label take full width */
+    border: 0.5px solid #ffffff;
+}
+
+nav button {
+    display: block;
+    width: 100%; /* Full width buttons */
+    height: 160px; /* Slightly smaller height for buttons */
+    cursor: pointer;
+    border: 0.5px solid #007bff; /* Border on buttons */
+    background-color: white;
+    color: #007bff; /* Text color matching the border */
+    font-size: 22px; /* Larger font size */
+    text-align: center; /* Center text */
+    line-height: 120px; /* Vertically center text */
+    transition: all 0.3s ease-in-out; /* Smooth transition for hover effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+nav button:hover {
+    background-color: #007bff;
+    color: white; /* Text color changes on hover */
+    transform: translateY(-5px); /* Slight upward movement on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+/* Active state for pressed button */
+nav button.active {
+    background-color: #64afff; /* Darker background when button is pressed */
+    color: white; /* Change text color to white */
+    transform: translateY(0); /* Remove upward movement */
+    box-shadow: none; /* Remove shadow when pressed */
+    pointer-events: none; /* Disable clicking after press */
+}
+
+
+        .content {
+            flex: 1; /* Content takes the remaining space */
+            padding: 20px;
+            overflow-y: auto; /* Enable vertical scrolling only for the content area */
+        }
+
+        .page {
+            display: none; /* Hide all pages by default */
+        }
+
+        .active {
+            display: block; /* Show active page */
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="wrapper">
+        <nav>
+            <div class="label">MENU</div>
+            <button onclick="navigateTo('home')">Input Pemain</button>
+            <button onclick="navigateTo('about')">Data Pemain</button>
+            <button onclick="navigateTo('contact')">Line Up Optimal</button>
+        </nav>
+        <div class="content">
+            <div class="container text-center my-4">
+                <h1>Pemilihan Pemain Optimal</h1>
+            </div>
+        <!-- halaman 1 -->
+            <div class="container mt-5 page active" id="home">
+                <h2 class="text-center mb-4">Player Attributes Input Form</h2>
+                <form id="playerInputForm">
+                    <div class="form-group">
+                        <label for="shortName">Player Name</label>
+                        <input type="text" class="form-control" id="shortName" placeholder="Enter Player Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clubName">Club Name</label>
+                        <input type="text" class="form-control" id="clubName" placeholder="Enter Club Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leagueName">League Name</label>
+                        <input type="text" class="form-control" id="leagueName" placeholder="Enter League Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="PrimaryPosition">Primary Position</label>
+                        <select class="form-control" id="PrimaryPosition" required>
+                            <option value="" disabled selected>Select Primary Position</option>
+                            <option value="RW">RW</option>
+                            <option value="ST">ST</option>
+                            <option value="LW">LW</option>                           
+                            <option value="GK">GK</option>
+                            <option value="CF">CF</option>
+                            <option value="CDM">CDM</option>
+                            <option value="CAM">CAM</option>
+                            <option value="LB">LB</option>
+                            <option value="RB">RB</option>
+                            <option value="LM">LM</option>
+                            <option value="RM">RM</option>
+                            <option value="CB">CB</option>                            
+                            <option value="RWB">RWB</option>                       
+                            <option value="CM">CM</option>
+                            <option value="LWB">LWB</option>
+
+                        </select>
+                    </div>
+                    <style>
+                        .form-group {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 15px;
+                        }
+                    
+                        .slider-label label {
+                            flex: 1; /* Memastikan label menyesuaikan ruang */
+                        }
+                    
+                        .slider-label input[type="range"] {
+                            flex: 3; /* Slider memiliki lebih banyak ruang */
+                            margin: 0 10px;
+                        }
+                    
+                        .slider-value {
+                            flex: 0; /* Span tidak melebar */
+                            width: 40px;
+                            text-align: center;
+                        }
+                    </style>
+                    
+                    <div class="form-group slider-label">
+                        <label for="pace">Pace</label>
+                        <input type="range" class="custom-range" id="pace" min="0" max="99" value="50" oninput="updateSliderValue('pace', this.value)">
+                        <span class="slider-value" id="paceValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="shooting">Shooting</label>
+                        <input type="range" class="custom-range" id="shooting" min="0" max="99" value="50" oninput="updateSliderValue('shooting', this.value)">
+                        <span class="slider-value" id="shootingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="dribbling">Dribbling</label>
+                        <input type="range" class="custom-range" id="dribbling" min="0" max="99" value="50" oninput="updateSliderValue('dribbling', this.value)">
+                        <span class="slider-value" id="dribblingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="passing">Passing</label>
+                        <input type="range" class="custom-range" id="passing" min="0" max="99" value="50" oninput="updateSliderValue('passing', this.value)">
+                        <span class="slider-value" id="passingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="defending">Defending</label>
+                        <input type="range" class="custom-range" id="defending" min="0" max="99" value="50" oninput="updateSliderValue('defending', this.value)">
+                        <span class="slider-value" id="defendingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="physic">Physic</label>
+                        <input type="range" class="custom-range" id="physic" min="0" max="99" value="50" oninput="updateSliderValue('physic', this.value)">
+                        <span class="slider-value" id="physicValue">50</span>
+                    </div>
+                    
+                    <div class="form-group slider-label">
+                        <label for="skillMoves">Skill Moves (0-5)</label>
+                        <input type="range" class="custom-range" id="skillMoves" min="0" max="5" value="3" oninput="updateSliderValue('skillMoves', this.value)">
+                        <span class="slider-value" id="skillMovesValue">3</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="weakFoot">Weak Foot (0-5)</label>
+                        <input type="range" class="custom-range" id="weakFoot" min="0" max="5" value="3" oninput="updateSliderValue('weakFoot', this.value)">
+                        <span class="slider-value" id="weakFootValue">3</span>
+                    </div>
+                
+                    <div class="form-group slider-label">
+                        <label for="attacking_crossing">Attacking Crossing</label>
+                        <input type="range" class="custom-range" id="attacking_crossing" min="0" max="99" value="50" oninput="updateSliderValue('attacking_crossing', this.value)">
+                        <span class="slider-value" id="attacking_crossingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="attacking_finishing">Attacking Finishing</label>
+                        <input type="range" class="custom-range" id="attacking_finishing" min="0" max="99" value="50" oninput="updateSliderValue('attacking_finishing', this.value)">
+                        <span class="slider-value" id="attacking_finishingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="attacking_heading_accuracy">Attacking Heading Accuracy</label>
+                        <input type="range" class="custom-range" id="attacking_heading_accuracy" min="0" max="99" value="50" oninput="updateSliderValue('attacking_heading_accuracy', this.value)">
+                        <span class="slider-value" id="attacking_heading_accuracyValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="attacking_short_passing">Attacking Short Passing</label>
+                        <input type="range" class="custom-range" id="attacking_short_passing" min="0" max="99" value="50" oninput="updateSliderValue('attacking_short_passing', this.value)">
+                        <span class="slider-value" id="attacking_short_passingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="attacking_volleys">Attacking Volleys</label>
+                        <input type="range" class="custom-range" id="attacking_volleys" min="0" max="99" value="50" oninput="updateSliderValue('attacking_volleys', this.value)">
+                        <span class="slider-value" id="attacking_volleysValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="skill_dribbling">Skill Dribbling</label>
+                        <input type="range" class="custom-range" id="skill_dribbling" min="0" max="99" value="50" oninput="updateSliderValue('skill_dribbling', this.value)">
+                        <span class="slider-value" id="skill_dribblingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="skill_curve">Skill Curve</label>
+                        <input type="range" class="custom-range" id="skill_curve" min="0" max="99" value="50" oninput="updateSliderValue('skill_curve', this.value)">
+                        <span class="slider-value" id="skill_curveValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="skill_fk_accuracy">Skill FK Accuracy</label>
+                        <input type="range" class="custom-range" id="skill_fk_accuracy" min="0" max="99" value="50" oninput="updateSliderValue('skill_fk_accuracy', this.value)">
+                        <span class="slider-value" id="skill_fk_accuracyValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="skill_long_passing">Skill Long Passing</label>
+                        <input type="range" class="custom-range" id="skill_long_passing" min="0" max="99" value="50" oninput="updateSliderValue('skill_long_passing', this.value)">
+                        <span class="slider-value" id="skill_long_passingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="skill_ball_control">Skill Ball Control</label>
+                        <input type="range" class="custom-range" id="skill_ball_control" min="0" max="99" value="50" oninput="updateSliderValue('skill_ball_control', this.value)">
+                        <span class="slider-value" id="skill_ball_controlValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="movement_acceleration">Movement Acceleration</label>
+                        <input type="range" class="custom-range" id="movement_acceleration" min="0" max="99" value="50" oninput="updateSliderValue('movement_acceleration', this.value)">
+                        <span class="slider-value" id="movement_accelerationValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="movement_sprint_speed">Movement Sprint Speed</label>
+                        <input type="range" class="custom-range" id="movement_sprint_speed" min="0" max="99" value="50" oninput="updateSliderValue('movement_sprint_speed', this.value)">
+                        <span class="slider-value" id="movement_sprint_speedValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="movement_agility">Movement Agility</label>
+                        <input type="range" class="custom-range" id="movement_agility" min="0" max="99" value="50" oninput="updateSliderValue('movement_agility', this.value)">
+                        <span class="slider-value" id="movement_agilityValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="movement_reactions">Movement Reactions</label>
+                        <input type="range" class="custom-range" id="movement_reactions" min="0" max="99" value="50" oninput="updateSliderValue('movement_reactions', this.value)">
+                        <span class="slider-value" id="movement_reactionsValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="movement_balance">Movement Balance</label>
+                        <input type="range" class="custom-range" id="movement_balance" min="0" max="99" value="50" oninput="updateSliderValue('movement_balance', this.value)">
+                        <span class="slider-value" id="movement_balanceValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="power_shot_power">Power Shot Power</label>
+                        <input type="range" class="custom-range" id="power_shot_power" min="0" max="99" value="50" oninput="updateSliderValue('power_shot_power', this.value)">
+                        <span class="slider-value" id="power_shot_powerValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="power_jumping">Power Jumping</label>
+                        <input type="range" class="custom-range" id="power_jumping" min="0" max="99" value="50" oninput="updateSliderValue('power_jumping', this.value)">
+                        <span class="slider-value" id="power_jumpingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="power_stamina">Power Stamina</label>
+                        <input type="range" class="custom-range" id="power_stamina" min="0" max="99" value="50" oninput="updateSliderValue('power_stamina', this.value)">
+                        <span class="slider-value" id="power_staminaValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="power_strength">Power Strength</label>
+                        <input type="range" class="custom-range" id="power_strength" min="0" max="99" value="50" oninput="updateSliderValue('power_strength', this.value)">
+                        <span class="slider-value" id="power_strengthValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="power_long_shots">Power Long Shots</label>
+                        <input type="range" class="custom-range" id="power_long_shots" min="0" max="99" value="50" oninput="updateSliderValue('power_long_shots', this.value)">
+                        <span class="slider-value" id="power_long_shotsValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="mentality_aggression">Mentality Aggression</label>
+                        <input type="range" class="custom-range" id="mentality_aggression" min="0" max="99" value="50" oninput="updateSliderValue('mentality_aggression', this.value)">
+                        <span class="slider-value" id="mentality_aggressionValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="mentality_interceptions">Mentality Interceptions</label>
+                        <input type="range" class="custom-range" id="mentality_interceptions" min="0" max="99" value="50" oninput="updateSliderValue('mentality_interceptions', this.value)">
+                        <span class="slider-value" id="mentality_interceptionsValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="mentality_positioning">Mentality Positioning</label>
+                        <input type="range" class="custom-range" id="mentality_positioning" min="0" max="99" value="50" oninput="updateSliderValue('mentality_positioning', this.value)">
+                        <span class="slider-value" id="mentality_positioningValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="mentality_vision">Mentality Vision</label>
+                        <input type="range" class="custom-range" id="mentality_vision" min="0" max="99" value="50" oninput="updateSliderValue('mentality_vision', this.value)">
+                        <span class="slider-value" id="mentality_visionValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="mentality_penalties">Mentality Penalties</label>
+                        <input type="range" class="custom-range" id="mentality_penalties" min="0" max="99" value="50" oninput="updateSliderValue('mentality_penalties', this.value)">
+                        <span class="slider-value" id="mentality_penaltiesValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="mentality_composure">Mentality Composure</label>
+                        <input type="range" class="custom-range" id="mentality_composure" min="0" max="99" value="50" oninput="updateSliderValue('mentality_composure', this.value)">
+                        <span class="slider-value" id="mentality_composureValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="defending_marking_awareness">Defending Marking Awareness</label>
+                        <input type="range" class="custom-range" id="defending_marking_awareness" min="0" max="99" value="50" oninput="updateSliderValue('defending_marking_awareness', this.value)">
+                        <span class="slider-value" id="defending_marking_awarenessValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="defending_standing_tackle">Defending Standing Tackle</label>
+                        <input type="range" class="custom-range" id="defending_standing_tackle" min="0" max="99" value="50" oninput="updateSliderValue('defending_standing_tackle', this.value)">
+                        <span class="slider-value" id="defending_standing_tackleValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="defending_sliding_tackle">Defending Sliding Tackle</label>
+                        <input type="range" class="custom-range" id="defending_sliding_tackle" min="0" max="99" value="50" oninput="updateSliderValue('defending_sliding_tackle', this.value)">
+                        <span class="slider-value" id="defending_sliding_tackleValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="goalkeeping_diving">Goalkeeping Diving</label>
+                        <input type="range" class="custom-range" id="goalkeeping_diving" min="0" max="99" value="50" oninput="updateSliderValue('goalkeeping_diving', this.value)">
+                        <span class="slider-value" id="goalkeeping_divingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="goalkeeping_handling">Goalkeeping Handling</label>
+                        <input type="range" class="custom-range" id="goalkeeping_handling" min="0" max="99" value="50" oninput="updateSliderValue('goalkeeping_handling', this.value)">
+                        <span class="slider-value" id="goalkeeping_handlingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="goalkeeping_kicking">Goalkeeping Kicking</label>
+                        <input type="range" class="custom-range" id="goalkeeping_kicking" min="0" max="99" value="50" oninput="updateSliderValue('goalkeeping_kicking', this.value)">
+                        <span class="slider-value" id="goalkeeping_kickingValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="goalkeeping_positioning">Goalkeeping Positioning</label>
+                        <input type="range" class="custom-range" id="goalkeeping_positioning" min="0" max="99" value="50" oninput="updateSliderValue('goalkeeping_positioning', this.value)">
+                        <span class="slider-value" id="goalkeeping_positioningValue">50</span>
+                    </div>
+                    <div class="form-group slider-label">
+                        <label for="goalkeeping_reflexes">Goalkeeping Reflexes</label>
+                        <input type="range" class="custom-range" id="goalkeeping_reflexes" min="0" max="99" value="50" oninput="updateSliderValue('goalkeeping_reflexes', this.value)">
+                        <span class="slider-value" id="goalkeeping_reflexesValue">50</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="workRate">Work Rate</label>
+                        <select class="form-control" id="workRate" required>
+                            <option value="" disabled selected>Select Work Rate</option>
+                            <option value="Low/Low">Low/Low</option>
+                            <option value="Low/Medium">Low/Medium</option>
+                            <option value="Low/High">Low/High</option>
+                            <option value="Medium/Low">Medium/Low</option>
+                            <option value="Medium/Medium">Medium/Medium</option>
+                            <option value="Medium/High">Medium/High</option>
+                            <option value="High/Low">High/Low</option>
+                            <option value="High/Medium">High/Medium</option>
+                            <option value="High/High">High/High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="BodyType">Body Type</label>
+                        <select class="form-control" id="BodyType" required>
+                            <option value="" disabled selected>Select Body Type</option>
+                            <option value="Unique">Unique</option>
+                            <option value="Normal (170-185)">Normal (170-185)</option>
+                            <option value="Lean (170-185)">Lean (170-185)</option>
+                            <option value="Normal (185+)">Normal (185+)</option>
+                            <option value="Lean (185+)">Lean (185+)</option>
+                            <option value="Normal (170-)">Normal (170-)</option>
+                            <option value="Stocky (185+)">Stocky (185+)</option>
+                            <option value="Lean (170-)">Lean (170-)</option>
+                            <option value="Stocky (170-185)">Stocky (170-185)</option>
+                            <option value="Stocky (170-)">Stocky (170-)</option>
+                            
+
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Player</button>
+                </form>
+            </div>
+
+        <!-- halaman 2 -->
+        <!-- Tabel Hasil -->
+            <div class="container mt-5 page" id="about" style="border: 2px solid #000; border-radius: 10px; padding: 20px; background-color: #f8f9fa;">
+                <h2 class="text-center mb-4">Player Data</h2>
+                <div style="overflow-x: auto;">
+                    <table class="table table-bordered table-striped" id="playerTable" style="display: none; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Attributes</th>
+                                <th>Values</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+    
+    <!-- halaman 3 -->
+    <!-- League and Club Selection -->
+            <style>
+                .custom-border {
+                    padding: 20px; /* Memberikan jarak dalam */
+                    margin: 20px 50; /* Memberikan jarak atas dan bawah */
+                }
+            </style>
+    
+            <div class="container mt-5 page custom-border" id="contact">
+                <h2 class="text-center mb-4">Club Line Up Seimbang</h2>
+                <div class="row">
+                    <!-- League Selection -->
+                    <div class="col-md-4">
+                        <h4>Select League</h4>
+                        <select id="leagueSelect" class="form-control" onchange="loadClubs()">
+                            <option value="">-- Select League --</option>
+                        </select>
+                    </div>
+            
+                    <!-- Club Selection -->
+                    <div class="col-md-4">
+                        <h4>Select Club</h4>
+                        <select id="clubSelect" class="form-control">
+                            <option value="">-- Select Club --</option>
+                        </select>
+                    </div>
+            
+                    <!-- Formation Selection -->
+                    <div class="col-md-4">
+                        <h4>Select Formation</h4>
+                        <select id="formationSelect" class="form-control">
+                            <option value="">-- Select Formation --</option>
+                            <option value="4-3-3">4-3-3</option>
+                            <option value="4-4-2">4-4-2</option>
+                            <option value="3-5-2">3-5-2</option>
+                        </select>
+                    </div>
+                    <style>
+                        .custom-button-container {
+                            margin-top: 20px; /* Menambahkan jarak 20px dari elemen sebelumnya */
+                        }
+                    </style>
+                    <div class="col-md-4 custom-button-container">
+                        <button id="loadFormationsBtn" class="btn btn-primary" onclick="loadFormations()">Memuat Line Up Terbaik</button>
+                    </div>
+                    <style>
+                        .formation-container {
+                            display: grid;
+                            grid-template-rows: repeat(6, 1fr);
+                            grid-template-columns: repeat(11, 1fr);
+                            gap: 5px;
+                            background-color: #fff;
+                            border-radius: 10px;
+                            padding: 20px;
+                            width: 100%;
+                            max-width: 800px;
+                            margin: 20px auto;
+                        }
+
+                        /* Class to add border when the button is pressed */
+                        .formation-border {
+                            border: 2px solid #000; /* Black border */
+                        }
+                
+                        .player {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            background-color: #add8e6; /* Light blue for players */
+                            color: black;
+                            font-size: 12px;
+                            font-weight: bold;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            text-align: center;
+                            border: 2px solid #000; /* Black border */
+                        }
+                
+                        .player-name {
+                            margin-top: 5px;
+                            font-size: 12px;
+                            color: #000; /* Black text for name */
+                            text-align: center;
+                        }
+                    </style>
+                    <div id="formationDisplay" class="formation-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer style="padding: 20px; text-align: center;">
+        <p>Penerapan KMEANS</p>
+    </footer>
+
+    <!-- JavaScript -->
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Menggunakan versi penuh jQuery -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+
+function navigateTo(pageId) {
+    const pages = document.querySelectorAll('.page');
+    const buttons = document.querySelectorAll('nav button'); // Ambil semua tombol
+    pages.forEach(page => {
+        page.classList.remove('active'); // Sembunyikan semua halaman
+    });
+    document.getElementById(pageId).classList.add('active'); // Tampilkan halaman yang sesuai
+
+    // Tambahkan kelas 'active' pada tombol yang diklik dan nonaktifkan tombol lainnya
+    buttons.forEach(button => {
+        button.classList.remove('active'); // Hapus kelas 'active' dari semua tombol
+    });
+    document.querySelector(`button[onclick="navigateTo('${pageId}')"]`).classList.add('active'); // Aktifkan tombol yang dipilih
+}
+
+        // Fungsi memperbarui nilai slider
+function updateSliderValue(id, value) {
+            document.getElementById(id + 'Value').textContent = value;
+        }
+    // Function to update slider value display
+function updateSliderValue(sliderId, value) {
+        var valueSpan = document.getElementById(sliderId + 'Value');
+        valueSpan.textContent = value;
+    }
+
+
+
+function loadLeaguesAndClubs() {
+    console.log("Requesting leagues data...");
+
+    $.ajax({
+        url: '/get_leagues', // Flask endpoint
+        method: 'GET',
+        success: function(data) {
+            console.log("Leagues data received:", data);
+            const leagueSelect = $('#leagueSelect');
+            leagueSelect.empty();
+            leagueSelect.append('<option value="">-- Select League --</option>');
+
+            for (const league in data) {
+                leagueSelect.append($('<option>', { value: league }).text(league));
+            }
+
+            leagueSelect.off('change').on('change', function () {
+                const selectedLeague = $(this).val();
+                loadClubs(selectedLeague, data);
+            });
+        },
+        error: function() {
+            console.error("Failed to load leagues data.");
+            alert("Error: Could not load leagues.");
+        }
+    });
+}
+
+// Function to load clubs based on selected league
+function loadClubs(selectedLeague, data) {
+    const clubSelect = $('#clubSelect');
+    clubSelect.empty();
+    clubSelect.append('<option value="">-- Select Club --</option>');
+
+    if (selectedLeague && data[selectedLeague]) {
+        data[selectedLeague].forEach(function(club) {
+            clubSelect.append($('<option>', { value: club }).text(club));
+        });
+    }
+}
+const formations = {
+    '4-3-3': {
+        Goalkeeper: [
+            { row: 6, col: 6, name: "Goalkeeper" }
+        ],
+        Defenders: [
+            { row: 5, col: 3, name: "Defender 1" },
+            { row: 5, col: 5, name: "Defender 2" },
+            { row: 5, col: 7, name: "Defender 3" },
+            { row: 5, col: 9, name: "Defender 4" }
+        ],
+        Midfielders: [
+            { row: 4, col: 4, name: "Midfielder 1" },
+            { row: 4, col: 6, name: "Midfielder 2" },
+            { row: 4, col: 8, name: "Midfielder 3" }
+        ],
+        Forwards: [
+            { row: 2, col: 4, name: "Forward 1" },
+            { row: 2, col: 6, name: "Forward 2" },
+            { row: 2, col: 8, name: "Forward 3" }
+        ]
+    },
+    '4-4-2': {
+        Goalkeeper: [
+            { row: 6, col: 6, name: "Goalkeeper" }
+        ],
+        Defenders: [
+            { row: 5, col: 3, name: "Defender 1" },
+            { row: 5, col: 5, name: "Defender 2" },
+            { row: 5, col: 7, name: "Defender 3" },
+            { row: 5, col: 9, name: "Defender 4" }
+        ],
+        Midfielders: [
+            { row: 4, col: 3, name: "Midfielder 1" },
+            { row: 4, col: 5, name: "Midfielder 2" },
+            { row: 4, col: 7, name: "Midfielder 3" },
+            { row: 4, col: 9, name: "Midfielder 4" }
+        ],
+        Forwards: [
+            { row: 2, col: 5, name: "Forward 1" },
+            { row: 2, col: 7, name: "Forward 2" }
+        ]
+    },
+    '3-5-2': {
+        Goalkeeper: [
+            { row: 6, col: 6, name: "Goalkeeper" }
+        ],
+        Defenders: [
+            { row: 5, col: 4, name: "Defender 1" },
+            { row: 5, col: 6, name: "Defender 2" },
+            { row: 5, col: 8, name: "Defender 3" }
+        ],
+        Midfielders: [
+            { row: 4, col: 2, name: "Midfielder 1" },
+            { row: 4, col: 4, name: "Midfielder 2" },
+            { row: 4, col: 6, name: "Midfielder 3" },
+            { row: 4, col: 8, name: "Midfielder 4" },
+            { row: 4, col: 10, name: "Midfielder 5" }
+        ],
+        Forwards: [
+            { row: 2, col: 5, name: "Forward 1" },
+            { row: 2, col: 7, name: "Forward 2" },
+        ]
+    }
+};
+
+// Function to load formations based on selected club
+function loadFormations() {
+    const clubSelect = document.getElementById("clubSelect");
+    const selectedClub = clubSelect.value;
+    
+    const formationSelect = document.getElementById("formationSelect");
+    const selectedFormation = formationSelect.value; // Get the selected formation from the dropdown
+
+    if (selectedClub && selectedFormation) {
+        console.log("Selected Club:", selectedClub);
+        console.log("Selected Formation:", selectedFormation);
+
+
+        // Send selected data to the backend via POST
+        $.ajax({
+            url: '/get_player_info',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                club_name: selectedClub,
+                formasi_input: selectedFormation
+            }),
+            success: function(data) {
+                console.log("Player data received:", data);
+                displayFormation(data, selectedFormation);
+                                // Add the border class to the formation container after button press
+                const formationContainer = document.getElementById('formationDisplay');
+                formationContainer.classList.add('formation-border');
+            },
+            error: function() {
+                console.error("Error while loading player info.");
+                alert("Error: Could not load player information.");
+            }
+        });
+    } else {
+        console.log("No club or formation selected.");
+    }
+}
+// Initialize dropdowns
+loadLeaguesAndClubs();
+
+
+function displayFormation(players, formationName) {
+    const formation = formations[formationName];
+    if (!formation) {
+        console.error(`Formasi ${formationName} tidak ditemukan.`);
+        return;
+    }
+
+    const formationContainer = document.getElementById('formationDisplay');
+    formationContainer.innerHTML = ""; // Bersihkan tampilan sebelumnya
+
+    // Initialize player index to start from the first player
+    let playerIndex = 0;
+
+    // Loop through each position in the formation (Goalkeeper, Defenders, Midfielders, Forwards)
+    Object.keys(formation).forEach((position) => {
+        formation[position].forEach(({ row, col, name }) => {
+            const player = players[playerIndex];
+
+            // Create the player container and position it correctly
+            const playerContainer = document.createElement('div');
+            playerContainer.className = 'player-container';
+            playerContainer.style.gridRow = row;
+            playerContainer.style.gridColumn = col;
+
+            // Create the div to hold the player's overall score
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player';
+            playerDiv.textContent = player ? player.overall : "N/A"; // Show overall rating in the circle
+
+            // Create the div to show the player's name
+            const playerName = document.createElement('div');
+            playerName.className = 'player-name';
+            playerName.textContent = player ? player.short_name : name; // Show player's short name or default position name
+
+            // Append both the player circle and name to the player container
+            playerContainer.appendChild(playerDiv);
+            playerContainer.appendChild(playerName);
+            formationContainer.appendChild(playerContainer);
+
+            // Move to the next player in the players array
+            playerIndex++;
+        });
+    });
+}
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("playerInputForm");
+    // const playerTable = document.getElementById("playerTable");
+    let playerCount = 0;
+
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent the default form submission
+            playerCount++;
+    // Collect player data and convert to integers where necessary
+        const playerData = {
+        name: document.getElementById("shortName").value,
+        club: document.getElementById("clubName").value,
+        league: document.getElementById("leagueName").value,
+        work_rate: document.getElementById("workRate").value,
+        body_type: document.getElementById("BodyType").value,
+        primary_position: document.getElementById("PrimaryPosition").value,
+        skill_moves: parseInt(document.getElementById("skillMoves").value, 10), 
+        weak_foot: parseInt(document.getElementById("weakFoot").value, 10),
+        pace: parseInt(document.getElementById("pace").value, 10),
+        shooting: parseInt(document.getElementById("shooting").value, 10),
+        dribbling: parseInt(document.getElementById("dribbling").value, 10),
+        passing: parseInt(document.getElementById("passing").value, 10),
+        defending: parseInt(document.getElementById("defending").value, 10),
+        physic: parseInt(document.getElementById("physic").value, 10),
+        attacking_crossing: parseInt(document.getElementById("attacking_crossing").value, 10),
+        attacking_finishing: parseInt(document.getElementById("attacking_finishing").value, 10),
+        attacking_heading_accuracy: parseInt(document.getElementById("attacking_heading_accuracy").value, 10),
+        attacking_short_passing: parseInt(document.getElementById("attacking_short_passing").value, 10),
+        attacking_volleys: parseInt(document.getElementById("attacking_volleys").value, 10),
+        skill_dribbling: parseInt(document.getElementById("skill_dribbling").value, 10),
+        skill_curve: parseInt(document.getElementById("skill_curve").value, 10),
+        skill_fk_accuracy: parseInt(document.getElementById("skill_fk_accuracy").value, 10),
+        skill_long_passing: parseInt(document.getElementById("skill_long_passing").value, 10),
+        skill_ball_control: parseInt(document.getElementById("skill_ball_control").value, 10),
+        movement_acceleration: parseInt(document.getElementById("movement_acceleration").value, 10),
+        movement_sprint_speed: parseInt(document.getElementById("movement_sprint_speed").value, 10),
+        movement_agility: parseInt(document.getElementById("movement_agility").value, 10),
+        movement_reactions: parseInt(document.getElementById("movement_reactions").value, 10),
+        movement_balance: parseInt(document.getElementById("movement_balance").value, 10),
+        power_shot_power: parseInt(document.getElementById("power_shot_power").value, 10),
+        power_jumping: parseInt(document.getElementById("power_jumping").value, 10),
+        power_stamina: parseInt(document.getElementById("power_stamina").value, 10),
+        power_strength: parseInt(document.getElementById("power_strength").value, 10),
+        power_long_shots: parseInt(document.getElementById("power_long_shots").value, 10),
+        mentality_aggression: parseInt(document.getElementById("mentality_aggression").value, 10),
+        mentality_interceptions: parseInt(document.getElementById("mentality_interceptions").value, 10),
+        mentality_positioning: parseInt(document.getElementById("mentality_positioning").value, 10),
+        mentality_vision: parseInt(document.getElementById("mentality_vision").value, 10),
+        mentality_penalties: parseInt(document.getElementById("mentality_penalties").value, 10),
+        mentality_composure: parseInt(document.getElementById("mentality_composure").value, 10),
+        defending_marking_awareness: parseInt(document.getElementById("defending_marking_awareness").value, 10),
+        defending_standing_tackle: parseInt(document.getElementById("defending_standing_tackle").value, 10),
+        defending_sliding_tackle: parseInt(document.getElementById("defending_sliding_tackle").value, 10),
+        goalkeeping_diving: parseInt(document.getElementById("goalkeeping_diving").value, 10),
+        goalkeeping_handling: parseInt(document.getElementById("goalkeeping_handling").value, 10),
+        goalkeeping_kicking: parseInt(document.getElementById("goalkeeping_kicking").value, 10),
+        goalkeeping_positioning: parseInt(document.getElementById("goalkeeping_positioning").value, 10),
+        goalkeeping_reflexes: parseInt(document.getElementById("goalkeeping_reflexes").value, 10)
+    };
+
+    console.log("Data to send:", playerData);
+
+    // playerTable.style.display = "table";
+
+    // Kirim data ke Flask backend
+    fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(playerData),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch prediction");
+            }
+            return response.json();
+        })
+        .then((data) => {
+                // Create a new div for the player label and table
+                const playerSectionWrapper = document.createElement("div");
+                playerSectionWrapper.classList.add("player-section-wrapper");
+
+                // Apply styles to the wrapper div for border
+                playerSectionWrapper.style.border = "2px solid #000";
+                playerSectionWrapper.style.borderRadius = "10px";
+                playerSectionWrapper.style.padding = "20px";
+                playerSectionWrapper.style.marginBottom = "30px"; // Spacing between sections
+                playerSectionWrapper.style.backgroundColor = "#f8f9fa"; // Light background
+
+                // Create label for the player (Player 1, Player 2, etc.)
+                const playerLabel = document.createElement("h3");
+                playerLabel.textContent = `Player ${playerCount}`;
+                playerSectionWrapper.appendChild(playerLabel);
+
+                // Create the table for player data
+                const newTable = document.createElement("table");
+                newTable.classList.add("table", "table-bordered", "table-striped");
+
+                // Add header and rows for player data
+                newTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <td>${playerData.name}</td>
+                        </tr>
+                        <tr>
+                            <th>Club</th>
+                            <td>${playerData.club}</td>
+                        </tr>
+                        <tr>
+                            <th>League</th>
+                            <td>${playerData.league}</td>
+                        </tr>
+                        <tr>
+                            <th>Work Rate</th>
+                            <td>${playerData.work_rate}</td>
+                        </tr>
+                        <tr>
+                            <th>Skill Moves</th>
+                            <td>${playerData.skill_moves}</td>
+                        </tr>
+                        <tr>
+                            <th>Weak Foot</th>
+                            <td>${playerData.weak_foot}</td>
+                        </tr>
+                        <tr>
+                            <th>Pace</th>
+                            <td>${playerData.pace}</td>
+                        </tr>
+                        <tr>
+                            <th>Shooting</th>
+                            <td>${playerData.shooting}</td>
+                        </tr>
+                        <tr>
+                            <th>Dribbling</th>
+                            <td>${playerData.dribbling}</td>
+                        </tr>
+                        <tr>
+                            <th>Passing</th>
+                            <td>${playerData.passing}</td>
+                        </tr>
+                        <tr>
+                            <th>Defending</th>
+                            <td>${playerData.defending}</td>
+                        </tr>
+                        <tr>
+                            <th>Physic</th>
+                            <td>${playerData.physic}</td>
+                        </tr>
+                        <tr>
+                            <th>Overall</th>
+                            <td>${data.overall}</td>
+                        </tr>
+                        <tr>
+                            <th>primary position</th>
+                            <td>${playerData.primary_position}</td>
+                        </tr>
+                        <tr>
+                            <th>Position</th>
+                            <td>${data.position}</td>
+                        </tr>
+                    </tbody>
+                `;
+
+                // Append the table to the wrapper div
+                playerSectionWrapper.appendChild(newTable);
+
+                // Insert the new player section wrapper into the DOM
+                document.querySelector("#about").appendChild(playerSectionWrapper);
+
+                document.querySelectorAll('input[type="range"]').forEach((slider) => {
+            if (slider.id === "skillMoves" || slider.id === "weakFoot") {
+                slider.value = 3; // Resetting specific sliders to 3
+            } else {
+                slider.value = 50; // Resetting all other sliders to 50
+            }
+            // Update the displayed value next to the slider
+            const valueSpan = document.getElementById(slider.id + "Value");
+            if (valueSpan) {
+                valueSpan.textContent = slider.value;
+            }
+        });
+                    // Reset the form for the next input
+                    form.reset()
+;
+                })
+                .catch((error) => console.error('Error:', error));
+        });
+    } else {
+        console.error("Form element not found!");
+    }
+});
+
+
+
+</script>
+
+</body>
+</html>
